@@ -1,10 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
 
 import 'package:student_record/DB/dbfunctions/dbfunctions.dart';
-import 'package:student_record/DB/model/datamodel.dart';
+
 import 'package:student_record/Screens/StudentAdd.dart';
 import 'package:student_record/Screens/Studentdetails.dart';
 import 'package:student_record/Screens/search.dart';
