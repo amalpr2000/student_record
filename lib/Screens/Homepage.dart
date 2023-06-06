@@ -8,6 +8,10 @@ import 'package:student_record/Screens/StudentAdd.dart';
 import 'package:student_record/Screens/Studentdetails.dart';
 import 'package:student_record/Screens/search.dart';
 import 'package:student_record/Screens/studentEdit.dart';
+import 'package:get/get.dart';
+
+import 'package:student_record/controllers/add_controller.dart';
+import 'package:student_record/controllers/delete_controller.dart';
 
 class homePage extends StatelessWidget {
   homePage({super.key});
@@ -22,9 +26,7 @@ class homePage extends StatelessWidget {
           actions: [
             IconButton(
                 onPressed: (() {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => SearchScreen(),
-                  ));
+                  Get.to(SearchScreen());
                 }),
                 icon: Icon(Icons.search))
           ],
@@ -32,8 +34,7 @@ class homePage extends StatelessWidget {
         body: StudentListView(),
         floatingActionButton: FloatingActionButton(
           onPressed: (() {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: ((context) => StudentAdd())));
+            Get.to(StudentAdd());
           }),
           tooltip: 'Add Student',
           child: const Icon(Icons.person_add),
@@ -42,79 +43,76 @@ class homePage extends StatelessWidget {
 }
 
 class StudentListView extends StatelessWidget {
-  const StudentListView({super.key});
+  StudentListView({super.key});
+
+  final obj = AddController();
+  final del = DeleteController();
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: studentListNotifier,
-      builder: (context, studentList, child) {
-        return ListView.separated(
-            itemBuilder: ((context, index) {
-              return Padding(
-                padding: const EdgeInsets.all(10),
-                child: ListTile(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  contentPadding: EdgeInsets.all(15),
-                  tileColor: Colors.indigo.shade100,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: ((context) => StudentDetails(
-                              studentdetails: studentList[index],
-                            ))));
-                  },
-                  title: Text(studentList[index].name),
-                  leading: GestureDetector(
-                    onTap: () => showprofile(context, studentList[index].image),
-                    child: CircleAvatar(
-                      backgroundImage: studentList[index].image == 'x'
-                          ? AssetImage('assets/profilePic.png') as ImageProvider
-                          : FileImage(File(studentList[index].image)),
-                      radius: 30,
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        onPressed: (() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => StudentEdit(
-                              student: studentList[index],
-                              index: index,
-                            ),
-                          ));
-                        }),
-                        icon: Icon(
-                          Icons.edit,
-                          color: Colors.indigo,
-                          size: 25,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: (() {
-                          deleteStudent(index);
-                        }),
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                          size: 25,
-                        ),
-                      )
-                    ],
+    return Obx(
+      () => ListView.separated(
+          itemBuilder: ((context, index) {
+            return Padding(
+              padding: const EdgeInsets.all(10),
+              child: ListTile(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                contentPadding: EdgeInsets.all(15),
+                tileColor: Colors.indigo.shade100,
+                onTap: () {
+                  // Navigator.of(context).push(MaterialPageRoute(
+                  //     builder: ((context) => StudentDetails(
+                  //           studentdetails: list[index],
+                  //         ))));
+                  Get.to(StudentDetails(studentdetails: list[index]));
+                },
+                title: Text(list[index].name),
+                leading: GestureDetector(
+                  onTap: () => showprofile(context, list[index].image),
+                  child: CircleAvatar(
+                    backgroundImage: list[index].image == 'x'
+                        ? AssetImage('assets/profilePic.png') as ImageProvider
+                        : FileImage(File(list[index].image)),
+                    radius: 30,
                   ),
                 ),
-              );
-            }),
-            separatorBuilder: ((context, index) {
-              return SizedBox(
-                height: 0,
-              );
-            }),
-            itemCount: studentList.length);
-      },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: (() {
+                        
+                        Get.to(StudentEdit(student: list[index], index: index));
+                      }),
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.indigo,
+                        size: 25,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: (() {
+                        del.deleteStudent(index);
+                      }),
+                      icon: Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 25,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          }),
+          separatorBuilder: ((context, index) {
+            return SizedBox(
+              height: 0,
+            );
+          }),
+          itemCount: list.length),
     );
   }
 

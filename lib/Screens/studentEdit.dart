@@ -2,37 +2,32 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:student_record/DB/dbfunctions/dbfunctions.dart';
-import 'package:student_record/DB/model/datamodel.dart';
+import 'package:get/get.dart';
 
-class StudentEdit extends StatefulWidget {
+import 'package:student_record/DB/model/datamodel.dart';
+import 'package:student_record/controllers/edit_controller.dart';
+
+class StudentEdit extends StatelessWidget {
   StudentEdit({super.key, required this.student, required this.index});
   StudentModel student;
   int index;
 
-  @override
-  State<StudentEdit> createState() => _StudentEditState();
-}
+  EditController edit = EditController();
 
-class _StudentEditState extends State<StudentEdit> {
-  String imgPath = 'x';
-  late final namecontroller = TextEditingController(text: widget.student.name);
+  late final namecontroller = TextEditingController(text: student.name);
 
-  late final agecontroller = TextEditingController(text: widget.student.age);
+  late final agecontroller = TextEditingController(text: student.age);
 
-  late final phonecontroller =
-      TextEditingController(text: widget.student.phone);
+  late final phonecontroller = TextEditingController(text: student.phone);
 
-  late final emailcontroller =
-      TextEditingController(text: widget.student.email);
+  late final emailcontroller = TextEditingController(text: student.email);
 
   @override
   Widget build(BuildContext context) {
-    log(widget.student.image);
+    log(student.image);
 
-    if (imgPath == 'x') {
-      imgPath = widget.student.image;
+    if (edit.imgPath == 'x') {
+      edit.imgPath = student.image;
     }
     return Scaffold(
       appBar: AppBar(
@@ -49,22 +44,19 @@ class _StudentEditState extends State<StudentEdit> {
                   height: 25,
                 ),
                 InkWell(
-                  onTap: () async {
-                    final pickedImg = await ImagePicker()
-                        .pickImage(source: ImageSource.gallery);
-
-                    if (pickedImg != null) {
-                      setState(() {
-                        imgPath = pickedImg.path;
-                      });
-                    }
+                  onTap: () {
+                    edit.imgUpdate();
                   },
-                  child: CircleAvatar(
-                    backgroundImage: imgPath == 'x'
-                        ? AssetImage('assets/profilePic.png')
-                        : FileImage(File(imgPath)) as ImageProvider,
-                    radius: 70,
-                  ),
+                  child: GetBuilder(
+                      init: edit,
+                      builder: (controller) {
+                        return CircleAvatar(
+                          backgroundImage: edit.imgPath == 'x'
+                              ? AssetImage('assets/profilePic.png')
+                              : FileImage(File(edit.imgPath)) as ImageProvider,
+                          radius: 70,
+                        );
+                      }),
                 ),
                 SizedBox(height: 30),
                 Form(
@@ -160,15 +152,16 @@ class _StudentEditState extends State<StudentEdit> {
                                 emailcontroller.text != '' &&
                                 phonecontroller.text != '') {
                               final student = StudentModel(
-                                  name: namecontroller.text.trim(),
-                                  age: agecontroller.text.trim(),
-                                  phone: phonecontroller.text.trim(),
-                                  email: emailcontroller.text.trim(),
-                                  image: imgPath,
-                                  );
-                              updateStudent(widget.index, student);
+                                name: namecontroller.text.trim(),
+                                age: agecontroller.text.trim(),
+                                phone: phonecontroller.text.trim(),
+                                email: emailcontroller.text.trim(),
+                                image: edit.imgPath,
+                              );
+                             
+                              edit.updateStudent(index, student);
 
-                              Navigator.of(context).pop();
+                              Get.back();
                             }
                           }),
                           child: Text(
@@ -182,7 +175,7 @@ class _StudentEditState extends State<StudentEdit> {
                       width: 80,
                       child: ElevatedButton(
                           onPressed: (() {
-                            Navigator.of(context).pop();
+                            Get.back();
                           }),
                           child: Text(
                             'Cancel',
@@ -197,16 +190,4 @@ class _StudentEditState extends State<StudentEdit> {
       ),
     );
   }
-
-  // backImage() {
-  //   if (imgPath == null && widget.student.image == 'x') {
-  //     return const AssetImage('assets/profilePic.png');
-  //   } else if (imgPath != null && widget.student.image != 'x') {
-  //     return FileImage(File(imgPath));
-  //   } else if (imgPath == null && widget.student.image != 'x') {
-  //     return FileImage(File(widget.student.image!));
-  //   } else {
-  //     return FileImage(File(imgPath));
-  //   }
-  // }
 }

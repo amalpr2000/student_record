@@ -1,31 +1,12 @@
-import 'dart:developer';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:student_record/DB/dbfunctions/dbfunctions.dart';
-import 'package:student_record/DB/model/datamodel.dart';
+import 'package:get/get.dart';
+import 'package:student_record/controllers/add_controller.dart';
 
-class StudentAdd extends StatefulWidget {
+class StudentAdd extends StatelessWidget {
   StudentAdd({super.key});
 
-  @override
-  State<StudentAdd> createState() => _StudentAddState();
-}
-
-class _StudentAddState extends State<StudentAdd> {
-  final formkey1 = GlobalKey<FormState>();
-  final formkey2 = GlobalKey<FormState>();
-  final formkey3 = GlobalKey<FormState>();
-  String imgPath = 'x';
-  final namecontroller = TextEditingController();
-
-  final agecontroller = TextEditingController();
-
-  final phonecontroller = TextEditingController();
-
-  final emailcontroller = TextEditingController();
-  
+  AddController ad = AddController();
 
   @override
   Widget build(BuildContext context) {
@@ -44,21 +25,26 @@ class _StudentAddState extends State<StudentAdd> {
                   height: 25,
                 ),
                 InkWell(
-                  child: CircleAvatar(
-                    radius: 75,
-                    backgroundImage: imgPath == 'x'
-                        ? AssetImage('assets/profilePic.png') as ImageProvider
-                        : FileImage(File(imgPath)),
-                  ),
+                  child: GetBuilder(
+                      init: ad,
+                      builder: (controller) {
+                        return CircleAvatar(
+                          radius: 75,
+                          backgroundImage: ad.imgPath == 'x'
+                              ? AssetImage('assets/profilePic.png')
+                                  as ImageProvider
+                              : FileImage(File(ad.imgPath)),
+                        );
+                      }),
                   onTap: () {
-                    pickPhotoFromGallery();
+                    ad.pickPhotoFromGallery();
                   },
                 ),
                 SizedBox(height: 30),
                 Form(
-                  key: formkey1,
+                  key: ad.formkey1,
                   child: TextFormField(
-                    controller: namecontroller,
+                    controller: ad.namecontroller,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter the name';
@@ -78,13 +64,13 @@ class _StudentAddState extends State<StudentAdd> {
                   height: 10,
                 ),
                 Form(
-                  key: formkey2,
+                  key: ad.formkey2,
                   child: Row(
                     children: [
                       SizedBox(
                         width: 100,
                         child: TextFormField(
-                          controller: agecontroller,
+                          controller: ad.agecontroller,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Enter age';
@@ -108,7 +94,7 @@ class _StudentAddState extends State<StudentAdd> {
                       ),
                       Expanded(
                         child: TextFormField(
-                          controller: phonecontroller,
+                          controller: ad.phonecontroller,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Enter the phone Number';
@@ -133,11 +119,10 @@ class _StudentAddState extends State<StudentAdd> {
                 SizedBox(
                   height: 10,
                 ),
-                
                 Form(
-                  key: formkey3,
+                  key: ad.formkey3,
                   child: TextFormField(
-                    controller: emailcontroller,
+                    controller: ad.emailcontroller,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter the email';
@@ -167,21 +152,8 @@ class _StudentAddState extends State<StudentAdd> {
                       width: 80,
                       child: ElevatedButton(
                           onPressed: (() {
-                            if (formkey1.currentState!.validate() &&
-                                formkey2.currentState!.validate() &&
-                                formkey3.currentState!.validate()) {
-                              print('object');
-                              final student = StudentModel(
-                                  name: namecontroller.text.trim(),
-                                  age: agecontroller.text.trim(),
-                                  phone: phonecontroller.text.trim(),
-                                  email: emailcontroller.text.trim(),
-                                  image: imgPath,
-                                 );
-                              addStudent(student);
-                              log(imgPath);
-                              Navigator.of(context).pop();
-                            }
+                            ad.addStudent();
+                            Get.back();
                           }),
                           child: Text(
                             'Save',
@@ -194,7 +166,7 @@ class _StudentAddState extends State<StudentAdd> {
                       width: 80,
                       child: ElevatedButton(
                           onPressed: (() {
-                            Navigator.of(context).pop();
+                            Get.back();
                           }),
                           child: Text(
                             'Cancel',
@@ -208,15 +180,5 @@ class _StudentAddState extends State<StudentAdd> {
         ),
       ),
     );
-  }
-
-  Future<void> pickPhotoFromGallery() async {
-    final PickedImg =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (PickedImg != null) {
-      setState(() {
-        imgPath = PickedImg.path;
-      });
-    }
   }
 }

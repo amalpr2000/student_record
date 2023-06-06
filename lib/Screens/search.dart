@@ -1,61 +1,55 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'package:student_record/controllers/search_controller.dart';
 import '../DB/model/datamodel.dart';
 import 'StudentDetails.dart';
 
-class SearchScreen extends StatefulWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+class SearchScreen extends StatelessWidget {
+  SearchScreen({Key? key}) : super(key: key);
 
-  @override
-  State<SearchScreen> createState() => _SearchScreenState();
-}
-
-class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
 
-  List<StudentModel> studentList =
-      Hive.box<StudentModel>('student_db').values.toList();
+  SearchController search = SearchController();
 
-  late List<StudentModel> studentDisplay = List<StudentModel>.from(studentList);
-
-//function or widgets-------------------------------------------------------
-
+  //= List<StudentModel>.from(studentList);
   Widget expanded() {
-    return Expanded(
-      child: studentDisplay.isNotEmpty
-          ? ListView.builder(
-              itemCount: studentDisplay.length,
-              itemBuilder: (context, index) {
-                File img = File(studentDisplay[index].image);
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: img.path == 'x'
-                        ? AssetImage('assets/profilePic.png')
-                        : FileImage(img) as ImageProvider,
-                    radius: 22,
+    return GetBuilder(
+        init: search,
+        builder: (controller) {
+          return Expanded(
+            child: search.studentDisplay.isNotEmpty
+                ? ListView.builder(
+                    itemCount: search.studentDisplay.length,
+                    itemBuilder: (context, index) {
+                      File img = File(search.studentDisplay[index].image);
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: img.path == 'x'
+                              ? AssetImage('assets/profilePic.png')
+                              : FileImage(img) as ImageProvider,
+                          radius: 22,
+                        ),
+                        title: Text(search.studentDisplay[index].name),
+                        onTap: (() {
+                          
+                          Get.to(StudentDetails(studentdetails: search.studentDisplay[index]));
+                        }),
+                      );
+                    },
+                  )
+                : const Center(
+                    child: Text(
+                      'No results found',
+                      style: TextStyle(fontSize: 20),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  title: Text(studentDisplay[index].name),
-                  onTap: (() {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => StudentDetails(
-                                  studentdetails: studentDisplay[index],
-                                )));
-                  }),
-                );
-              },
-            )
-          : const Center(
-              child: Text(
-                'No results found',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-            ),
-    );
+          );
+        });
   }
 
   Widget searchTextField() {
@@ -65,27 +59,17 @@ class _SearchScreenState extends State<SearchScreen> {
       decoration:
           InputDecoration(labelText: 'Search', suffixIcon: Icon(Icons.search)),
       onChanged: (value) {
-        _searchStudent(value);
+        search.searchStudent(value);
       },
     );
   }
 
-//setstate
-  void _searchStudent(String value) {
-    setState(() {
-      studentDisplay = studentList
-          .where((element) =>
-              element.name.toLowerCase().contains(value.toLowerCase()))
-          .toList();
-    });
-  }
 
   void clearText() {
     _searchController.clear();
   }
 
-  //builder-------------------------------------------------------------
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
